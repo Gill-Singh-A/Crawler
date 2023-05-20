@@ -11,6 +11,11 @@ Modules/Packages used:
 * optparse
 * colorama
 * time
+<!-- -->
+Install the dependencies:
+```bash
+pip install -r requirements.txt
+```
 ## Input
 It takes input from the command that is used to run the python program.<br />It takes 2 types of arguments:
 1. URL to start crawling from

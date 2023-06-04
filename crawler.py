@@ -61,10 +61,10 @@ def get_all_urls(url):
 def crawl(url, interests):
 	global total_visited
 	total_visited += 1
-	display('*', f"Crawling => {Back.MAGENTA}{url}{Back.RESET}")
 	try:
 		i = 1
 		while True:
+			display('*', f"Crawling => {Back.MAGENTA}{url}{Back.RESET}")
 			response = get_all_urls(url)
 			done.append(url)
 			for interest in interests:
@@ -80,11 +80,13 @@ def crawl(url, interests):
 			else:
 				break
 	except KeyboardInterrupt:
-		return len(interested_url) + len(external_urls)
+		return len(internal_urls) + len(external_urls)
+	return len(internal_urls) + len(external_urls)
 
 if __name__ == "__main__":
-	print(f"\nTotal URLs Extracted = {crawl(argv[1], argv[2:])}")
+	crawl(argv[1], argv[2:])
 	print(f"Internal URLs = {len(internal_urls)}")
 	print(f"External URLs = {len(external_urls)}")
+	print(f"\nTotal URLs Extracted = {len(internal_urls) + len(external_urls)}")
 	final = '\n'.join(interested_url)
 	print(f"\n{Fore.GREEN}Interested URLs = {len(interested_url)}\n{Fore.CYAN}{Style.BRIGHT}{final}{Style.RESET_ALL}")

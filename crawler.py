@@ -17,6 +17,8 @@ status_color = {
 	' ': Fore.WHITE,
 }
 
+headers = {"User-Agent": "Mozilla/5.0"}
+
 def get_time():
 	return strftime("%H:%M:%S", localtime())
 def display(status, data):
@@ -37,7 +39,7 @@ def is_valid_url(url):
 	return bool(parsed.netloc) and bool(parsed.scheme)
 def get_all_urls(url):
 	domain_name = urlparse(url).netloc
-	response = requests.get(url)
+	response = requests.get(url, headers=headers)
 	soup = BeautifulSoup(response.content, "html.parser")
 	for a_tag in soup.findAll("a"):
 		href = a_tag.attrs.get("href")

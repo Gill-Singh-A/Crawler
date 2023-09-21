@@ -90,9 +90,9 @@ def crawl(url, interests):
 
 if __name__ == "__main__":
 	data = get_arguments(('-u', "--url", "url", "URL to start Crawling from"),
-						 ('-f', "--find", "find", "Words to find (seperated by ',')"),
-						 ('-s', "--session-id", "session_id", "Session ID (Cookie) for the Request Header (Optional)"),
-						 ('-w', "--write", "write", "Name of the File for the data to be dumped (default=current data and time)"))
+                         ('-f', "--find", "find", "Words to find (seperated by ',')"),
+                         ('-s', "--session-id", "session_id", "Session ID (Cookie) for the Request Header (Optional)"),
+                         ('-w', "--write", "write", "Name of the File for the data to be dumped (default=current data and time)"))
 	if not data.url:
 		display('-', "Please specify a URL!")
 		exit(0)

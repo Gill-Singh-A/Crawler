@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import requests, pickle
-from datetime import date
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from datetime import date

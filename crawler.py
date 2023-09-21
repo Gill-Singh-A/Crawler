@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from sys import argv
 import requests
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
@@ -17,7 +16,11 @@ status_color = {
 	' ': Fore.WHITE,
 }
 
-headers = {"User-Agent": "Mozilla/5.0"}
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.5615.50 Safari/537.36",
+    "Connection": "close",
+    "DNT": "1"
+}
 
 def get_time():
 	return strftime("%H:%M:%S", localtime())
@@ -86,7 +89,20 @@ def crawl(url, interests):
 	return len(internal_urls) + len(external_urls)
 
 if __name__ == "__main__":
-	crawl(argv[1], argv[2:])
+	data = get_arguments(('-u', "--url", "url", "URL to start Crawling from"),
+						 ('-w', "--search", "search", "Words to look for (seperated by ',')"),
+						 ('-s', "--session-id", "session_id", "Session ID (Cookie) for the Request Header (Optional)"))
+	if not data.url:
+		display('-', "Please specify a URL!")
+		exit(0)
+	if not data.search:
+		display('-', "Please specify Words to search for")
+		exit(0)
+	else:
+		data.search = data.search.split(',')
+	if data.session_id:
+		headers["Cookie"] = data.session_id
+	crawl(data.url, data.search)
 	print(f"Internal URLs = {len(internal_urls)}")
 	print(f"External URLs = {len(external_urls)}")
 	print(f"\nTotal URLs Extracted = {len(internal_urls) + len(external_urls)}")

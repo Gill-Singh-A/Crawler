@@ -4,8 +4,8 @@ A Program that crawls on web starting from a given web page and looking for keyw
 ## Requirements
 Langauge Used = Python3<br />
 Modules/Packages used:
-* sys
 * requests
+* pickle
 * bs4
 * datetime
 * optparse

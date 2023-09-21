@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-import requests
+import requests, pickle
+from datetime import date
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from datetime import date
@@ -24,8 +25,8 @@ headers = {
 
 def get_time():
 	return strftime("%H:%M:%S", localtime())
-def display(status, data):
-	print(f"{status_color[status]}[{status}] {Fore.BLUE}[{date.today()} {get_time()}] {status_color[status]}{Style.BRIGHT}{data}{Fore.RESET}{Style.RESET_ALL}")
+def display(status, data, start='', end='\n'):
+    print(f"{start}{status_color[status]}[{status}] {Fore.BLUE}[{date.today()} {strftime('%H:%M:%S', localtime())}] {status_color[status]}{Style.BRIGHT}{data}{Fore.RESET}{Style.RESET_ALL}", end=end)
 
 def get_arguments(*args):
 	parser = OptionParser()
@@ -90,21 +91,28 @@ def crawl(url, interests):
 
 if __name__ == "__main__":
 	data = get_arguments(('-u', "--url", "url", "URL to start Crawling from"),
-						 ('-w', "--search", "search", "Words to look for (seperated by ',')"),
-						 ('-s', "--session-id", "session_id", "Session ID (Cookie) for the Request Header (Optional)"))
+						 ('-f', "--find", "find", "Words to find (seperated by ',')"),
+						 ('-s', "--session-id", "session_id", "Session ID (Cookie) for the Request Header (Optional)"),
+						 ('-w', "--write", "write", "Name of the File for the data to be dumped (default=current data and time)"))
 	if not data.url:
 		display('-', "Please specify a URL!")
 		exit(0)
-	if not data.search:
-		display('-', "Please specify Words to search for")
+	if not data.find:
+		display('-', "Please specify Words to find")
 		exit(0)
 	else:
-		data.search = data.search.split(',')
+		data.find = data.find.split(',')
 	if data.session_id:
 		headers["Cookie"] = data.session_id
-	crawl(data.url, data.search)
+	if not data.write:
+		data.write = f"{date.today()} {strftime('%H_%M_%S', localtime())}"
+	crawl(data.url, data.find)
 	print(f"Internal URLs = {len(internal_urls)}")
 	print(f"External URLs = {len(external_urls)}")
 	print(f"\nTotal URLs Extracted = {len(internal_urls) + len(external_urls)}")
 	final = '\n'.join(interested_url)
 	print(f"\n{Fore.GREEN}Interested URLs = {len(interested_url)}\n{Fore.CYAN}{Style.BRIGHT}{final}{Style.RESET_ALL}")
+	display(':', f"Dumping Data to file {Back.MAGENTA}{data.write}{Back.RESET}", start='\n')
+	with open(f"{data.write}", 'wb') as file:
+		pickle.dump([internal_urls, external_urls, interested_url, data.find], file)
+	display('+', f"Dumped Data to file {Back.MAGENTA}{data.write}{Back.RESET}")

@@ -43,7 +43,11 @@ def is_valid_url(url):
 def get_all_urls(url):
 	domain_name = urlparse(url).netloc
 	response = requests.get(url, headers=headers)
-	soup = BeautifulSoup(response.content, "html.parser")
+	try:
+		soup = BeautifulSoup(response.content, "html.parser")
+	except:
+		display(':', f"Error while Parsing {Back.MAGENTA}{url}{Back.RESET}")
+		return -1
 	for a_tag in soup.findAll("a"):
 		href = a_tag.attrs.get("href")
 		if href == "" or href is None:
@@ -72,12 +76,13 @@ def crawl(url, interests):
 			display('*', f"Crawling => {Back.MAGENTA}{url}{Back.RESET}")
 			response = get_all_urls(url)
 			done.append(url)
-			for interest in interests:
-				if interest not in response and interest.upper() not in response and interest.lower() not in response:
-					break
-			else:
-				interested_url.append(url)
-				display('-', f"Interested URL => {Back.MAGENTA}{url}{Back.RESET}")
+			if response != -1:
+				for interest in interests:
+					if interest not in response and interest.upper() not in response and interest.lower() not in response:
+						break
+				else:
+					interested_url.append(url)
+					display('-', f"Interested URL => {Back.MAGENTA}{url}{Back.RESET}")
 			if i < len(internal_urls)-1:
 				while internal_urls[i] in done:
 					i += 1

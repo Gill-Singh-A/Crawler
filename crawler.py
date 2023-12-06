@@ -45,6 +45,9 @@ def get_all_urls(url):
 	domain_name = urlparse(url).netloc
 	try:
 		response = requests.get(url, headers=headers)
+	except KeyboardInterrupt:
+		display(' ', f"Keyboard Interrupt Detected...Quiting!", start='\n')
+		return -2
 	except:
 		display(':', f"Error while Crawling URL {Back.MAGENTA}{url}{Back.RESET}")
 		return -1
@@ -83,6 +86,8 @@ def crawl(url, interests, external):
 			display('*', f"Crawling => {Back.MAGENTA}{url}{Back.RESET}")
 			response = get_all_urls(url)
 			done.append(url)
+			if response == -2:
+				return len(internal_urls) + len(external_urls)
 			if response != -1:
 				for interest in interests:
 					if interest not in response and interest.upper() not in response and interest.lower() not in response:

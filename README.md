@@ -17,14 +17,11 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 ## Input
-It takes input from the command that is used to run the python program.<br />It takes 2 types of arguments:
-1. URL to start crawling from
-2. Keywords to search
-<!-- -->
-For Example:
-```bash
-python crawler.py url keyword_1 keyword_2 ...
-```
+ * '-u', "--url" : URL to start Crawling from
+ * '-t', "--in-text" : Words to find in text (seperated by ',')
+ * '-s', "--session-id" : Session ID (Cookie) for the Request Header (Optional)
+ * '-w', "--write" : Name of the File for the data to be dumped (default=current data and time)
+ * '-e', "--external" : Crawl on External URLs (True/False, default=False)
 ## Output
 It will stop when it has crawled all the internal links of the given URL or if the user presses CTRL+C.<br />
 It then display Information about total URLs extracted, Internal URLs extracted and external URLs extracted.<br />

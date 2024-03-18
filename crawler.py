@@ -63,6 +63,8 @@ def get_all_urls(url):
 		href = urljoin(url, href)
 		parsed_href = urlparse(href)
 		href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
+		if parsed_href.query != '':
+			href += f"?{parsed_href.query}"
 		if not is_valid_url(href):
 			continue
 		if href in internal_urls:
@@ -115,18 +117,18 @@ def crawl(url, interests, external):
 
 if __name__ == "__main__":
 	data = get_arguments(('-u', "--url", "url", "URL to start Crawling from"),
-                         ('-f', "--find", "find", "Words to find (seperated by ',')"),
+                         ('-t', "--in-text", "intext", "Words to find in text (seperated by ',')"),
                          ('-s', "--session-id", "session_id", "Session ID (Cookie) for the Request Header (Optional)"),
                          ('-w', "--write", "write", "Name of the File for the data to be dumped (default=current data and time)"),
 						 ('-e', "--external", "external", f"Crawl on External URLs (True/False, default={crawl_external})"))
 	if not data.url:
 		display('-', "Please specify a URL!")
 		exit(0)
-	if not data.find:
+	if not data.intext:
 		display('-', "Please specify Words to find")
 		exit(0)
 	else:
-		data.find = data.find.split(',')
+		data.intext = data.intext.split(',')
 	if data.external == "True":
 		data.external = True
 		display('*', "Crawling on External URLs set to True")
@@ -136,7 +138,7 @@ if __name__ == "__main__":
 		headers["Cookie"] = data.session_id
 	if not data.write:
 		data.write = f"{date.today()} {strftime('%H_%M_%S', localtime())}"
-	crawl(data.url, data.find, data.external)
+	crawl(data.url, data.intext, data.external)
 	print(f"Internal URLs = {len(internal_urls)}")
 	print(f"External URLs = {len(external_urls)}")
 	print(f"\nTotal URLs Extracted = {len(internal_urls) + len(external_urls)}")
@@ -144,5 +146,5 @@ if __name__ == "__main__":
 	print(f"\n{Fore.GREEN}Interested URLs = {len(interested_url)}\n{Fore.CYAN}{Style.BRIGHT}{final}{Style.RESET_ALL}")
 	display(':', f"Dumping Data to file {Back.MAGENTA}{data.write}{Back.RESET}", start='\n')
 	with open(f"{data.write}", 'wb') as file:
-		pickle.dump([internal_urls, external_urls, interested_url, data.find], file)
+		pickle.dump([internal_urls, external_urls, interested_url, data.intext], file)
 	display('+', f"Dumped Data to file {Back.MAGENTA}{data.write}{Back.RESET}")

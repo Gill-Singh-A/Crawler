@@ -41,7 +41,7 @@ crawl_external = False
 def is_valid_url(url):
     parsed = urlparse(url)
     return bool(parsed.netloc) and bool(parsed.scheme)
-def get_all_urls(thread_name, url, internal_urls, external_urls, all_urls, timeout):
+def get_all_urls(thread_name, url, internal_urls, external_urls, all_urls, timeout, ignore_extensions):
     domain_name = urlparse(url).netloc
     try:
         if timeout == -1:
@@ -74,6 +74,8 @@ def get_all_urls(thread_name, url, internal_urls, external_urls, all_urls, timeo
         href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
         if parsed_href.query != '':
             href += f"?{parsed_href.query}"
+        if href.split('.')[-1].lower() in ignore_extensions:
+            continue
         if not is_valid_url(href):
             continue
         if href in internal_urls:
@@ -90,16 +92,16 @@ def get_all_urls(thread_name, url, internal_urls, external_urls, all_urls, timeo
         internal_urls.append(href)
         all_urls.append(href)
     return internal_urls, external_urls, all_urls, response.text
-def crawl(thread_name, urls, interests, external, timeout):
+def crawl(thread_name, urls, interests, external, timeout, ignore_extensions):
     crawl_data = {}
-    for url in urls:
-        start_url = url
-        crawl_data[start_url] = {"internal_urls": [], "external_urls": [], "interested_urls": []}
-        all_urls, done = [], []
-        try:
+    try:
+        for url in urls:
+            start_url = url
+            crawl_data[start_url] = {"internal_urls": [], "external_urls": [], "interested_urls": []}
+            all_urls, done = [], []
             i = 1
             while True:
-                crawl_data[start_url]["internal_urls"], crawl_data[start_url]["external_urls"], all_urls, response = get_all_urls(thread_name, url, crawl_data[start_url]["internal_urls"], crawl_data[start_url]["external_urls"], all_urls, timeout)
+                crawl_data[start_url]["internal_urls"], crawl_data[start_url]["external_urls"], all_urls, response = get_all_urls(thread_name, url, crawl_data[start_url]["internal_urls"], crawl_data[start_url]["external_urls"], all_urls, timeout, ignore_extensions)
                 with lock:
                     display('*', f"{Back.BLUE}{thread_name}{Back.RESET} : Crawling => {Back.MAGENTA}{url}{Back.RESET}")
                 done.append(url)
@@ -128,9 +130,9 @@ def crawl(thread_name, urls, interests, external, timeout):
                         url = all_urls[i]
                     else:
                         break
-        except KeyboardInterrupt:
-            display('*', f"{Back.BLUE}{thread_name}{Back.RESET} : DONE")
-            return crawl_data
+    except KeyboardInterrupt:
+        display('*', f"{Back.BLUE}{thread_name}{Back.RESET} : DONE")
+        return crawl_data
     display('*', f"{Back.BLUE}{thread_name}{Back.RESET} : DONE")
     return crawl_data
 
@@ -140,7 +142,8 @@ if __name__ == "__main__":
                          ('-s', "--session-id", "session_id", "Session ID (Cookie) for the Request Header (Optional)"),
                          ('-w', "--write", "write", "Name of the File for the data to be dumped (default=current data and time)"),
                          ('-e', "--external", "external", f"Crawl on External URLs (True/False, default={crawl_external})"),
-                         ('-T', "--timeout", "timeout", "Request Timeout"))
+                         ('-T', "--timeout", "timeout", "Request Timeout"),
+                         ('-i', "--ignore-extensions", "ignore_extensions", "Extensions to Ignore (seperated by ',')"))
     if not data.url:
         display('-', "Please specify a URL!")
         exit(0)
@@ -170,6 +173,10 @@ if __name__ == "__main__":
         data.timeout = float(data.timeout)
     else:
         data.timeout = -1
+    if data.ignore_extensions:
+        data.ignore_extensions = data.ignore_extensions.split(',')
+    else:
+        data.ignore_extensions = []
     total_urls = len(data.url)
     if total_urls < thread_count:
         thread_count = total_urls
@@ -179,7 +186,7 @@ if __name__ == "__main__":
     threads = []
     crawl_data = {}
     for index, url_division in enumerate(url_divisions):
-        threads.append(pool.apply_async(crawl, (f"Thread {index+1}", url_division, data.intext, data.external, data.timeout)))
+        threads.append(pool.apply_async(crawl, (f"Thread {index+1}", url_division, data.intext, data.external, data.timeout, data.ignore_extensions)))
     for thread in threads:
         crawl_data.update(thread.get())
     pool.close()

@@ -39,10 +39,18 @@ thread_count = cpu_count()
 crawl_external = False
 
 def is_valid_url(url):
-    parsed = urlparse(url)
-    return bool(parsed.netloc) and bool(parsed.scheme)
+    try:
+        parsed = urlparse(url)
+        return bool(parsed.netloc) and bool(parsed.scheme)
+    except:
+        return False
 def get_all_urls(thread_name, url, internal_urls, external_urls, all_urls, timeout, ignore_extensions):
-    domain_name = urlparse(url).netloc
+    try:
+        domain_name = urlparse(url).netloc
+    except:
+        with lock:
+            display(':', f"{Back.BLUE}{thread_name}{Back.RESET} : Error while Crawling URL {Back.MAGENTA}{url}{Back.RESET}")
+        return internal_urls, external_urls, all_urls, -1
     try:
         if timeout == -1:
             response = requests.get(url, headers=headers)

@@ -112,7 +112,7 @@ def crawl(thread_name, urls, interests, external, timeout, ignore_extensions):
                 if response != -1:
                     for interest in interests:
                         if interest in response or interest.upper() in response or interest.lower() in response:
-                            crawl_data[start_url]["interested_url"].append(url)
+                            crawl_data[start_url]["interested_urls"].append(url)
                             with lock:
                                 display('-', f"{Back.BLUE}{thread_name}{Back.RESET} : Interested URL => {Back.MAGENTA}{url}{Back.RESET}")
                             break
